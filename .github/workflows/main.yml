@@ -64,4 +64,4 @@ EOF
         uses: actions/upload-artifact@v4
         with:
           name: kimi-ios-app
-          path: build/*.ipa
+          path: ${{ env.BUILD_DIR }}/*.ipa
