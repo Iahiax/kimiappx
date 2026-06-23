@@ -10,6 +10,8 @@ jobs:
     runs-on: macos-latest
     env:
       BUILD_DIR: build
+      P12_BASE64: ${{ secrets.P12_BASE64 }}
+      PROFILE_BASE64: ${{ secrets.PROFILE_BASE64 }}
 
     steps:
       - uses: actions/checkout@v3
@@ -22,12 +24,12 @@ jobs:
           ls -la
 
       - name: Import signing identities (if provided)
-        if: ${{ secrets.P12_BASE64 != '' && secrets.PROFILE_BASE64 != '' }}
+        if: ${{ env.P12_BASE64 != '' && env.PROFILE_BASE64 != '' }}
         uses: apple-actions/import-codesign-certs@v1
         with:
-          p12-base64: ${{ secrets.P12_BASE64 }}
+          p12-base64: ${{ env.P12_BASE64 }}
           p12-password: ${{ secrets.P12_PASSWORD }}
-          provisioning-profile-base64: ${{ secrets.PROFILE_BASE64 }}
+          provisioning-profile-base64: ${{ env.PROFILE_BASE64 }}
 
       - name: Prepare build dir
         run: mkdir -p $BUILD_DIR
