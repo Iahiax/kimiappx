@@ -1,126 +1,190 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KimiApp – ChatGPT Style</title>
-
-<script src="https://js.puter.com/v2/"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kimi Chat</title>
 
 <style>
+    :root {
+        color-scheme: dark;
+    }
+
     body {
         margin: 0;
         padding: 0;
-        background: #111;
-        color: #fff;
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro", sans-serif;
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
+        background: #050509;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #f5f5f7;
     }
 
-    #messages {
-        flex: 1;
+    #header {
+        height: 50px;
+        display: flex;
+        align-items: center;
+        padding: 0 15px;
+        border-bottom: 1px solid #222;
+        background: #0b0b10;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    #chat {
+        height: calc(100vh - 100px);
         overflow-y: auto;
         padding: 15px;
         box-sizing: border-box;
     }
 
     .msg {
-        max-width: 80%;
-        padding: 12px 16px;
-        margin: 10px 0;
-        border-radius: 14px;
+        margin-bottom: 14px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        max-width: 85%;
         line-height: 1.6;
-        white-space: pre-wrap;
         font-size: 15px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
     }
 
-    .me {
+    .user {
         background: #0a84ff;
-        color: white;
         margin-left: auto;
-        border-bottom-right-radius: 4px;
+        text-align: left;
+        color: #fff;
     }
 
-    .ai {
-        background: #2c2c2e;
-        color: #fff;
+    .bot {
+        background: #111118;
+        border: 1px solid #262637;
         margin-right: auto;
-        border-bottom-left-radius: 4px;
+        text-align: left;
+    }
+
+    .meta {
+        font-size: 11px;
+        opacity: 0.7;
+        margin-top: 4px;
+    }
+
+    #typing {
+        font-size: 13px;
+        opacity: 0.7;
+        padding: 0 15px 8px;
+        display: none;
     }
 
     #inputBox {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 50px;
+        background: #050509;
         display: flex;
-        padding: 10px;
-        background: #1c1c1e;
-        border-top: 1px solid #333;
+        padding: 8px 10px;
+        box-sizing: border-box;
+        border-top: 1px solid #222;
     }
 
-    #input {
+    #text {
         flex: 1;
-        padding: 12px;
-        border-radius: 10px;
         border: none;
+        border-radius: 10px;
+        padding: 8px 10px;
+        font-size: 15px;
         outline: none;
-        background: #2c2c2e;
+        background: #15151f;
+        color: #f5f5f7;
+    }
+
+    #send {
+        width: 70px;
+        margin-left: 8px;
+        border: none;
+        border-radius: 10px;
+        background: #0a84ff;
         color: white;
         font-size: 15px;
     }
 
-    #sendBtn {
-        padding: 12px 18px;
-        margin-left: 10px;
-        background: #0a84ff;
-        border: none;
-        border-radius: 10px;
-        color: white;
-        font-size: 15px;
+    #send:disabled {
+        opacity: 0.5;
     }
 </style>
 </head>
-
 <body>
 
-<div id="messages"></div>
+<div id="header">Kimi Chat</div>
+
+<div id="chat"></div>
+<div id="typing">المساعد يكتب…</div>
 
 <div id="inputBox">
-    <input id="input" type="text" placeholder="اكتب رسالتك…" />
-    <button id="sendBtn" onclick="send()">إرسال</button>
+    <input id="text" placeholder="اكتب رسالتك هنا…" autocomplete="off" />
+    <button id="send">إرسال</button>
 </div>
 
 <script>
-const messages = document.getElementById("messages");
+    const chat = document.getElementById("chat");
+    const text = document.getElementById("text");
+    const send = document.getElementById("send");
+    const typing = document.getElementById("typing");
 
-function addMessage(text, sender) {
-    const div = document.createElement("div");
-    div.className = "msg " + sender;
-    div.innerText = text;
-    messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
-}
-
-async function send() {
-    const input = document.getElementById("input");
-    const text = input.value.trim();
-    if (!text) return;
-
-    addMessage(text, "me");
-    input.value = "";
-
-    addMessage("… يفكر", "ai");
-
-    try {
-        const response = await puter.ai.chat(text, {
-            model: "moonshotai/kimi-k2.6"
-        });
-
-        messages.lastChild.innerText = response.output_text;
-
-    } catch (err) {
-        messages.lastChild.innerText = "خطأ: " + err;
+    function addMessage(content, sender) {
+        const wrap = document.createElement("div");
+        wrap.className = "msg " + sender;
+        wrap.innerHTML = content;
+        chat.appendChild(wrap);
+        chat.scrollTop = chat.scrollHeight;
     }
-}
+
+    function setTyping(state) {
+        typing.style.display = state ? "block" : "none";
+    }
+
+    async function fakeApiReply(prompt) {
+        // هنا مكان ربط API الحقيقي لاحقًا
+        // الآن نستخدم رد تجريبي فقط
+        const base = "هذا رد تجريبي يشبه رد ChatGPT على سؤالك:\n\n";
+        return base + prompt;
+    }
+
+    async function handleSend() {
+        const value = text.value.trim();
+        if (!value) return;
+
+        addMessage(value, "user");
+        text.value = "";
+        text.focus();
+
+        send.disabled = true;
+        setTyping(true);
+
+        try {
+            // استبدل هذه الدالة لاحقًا بنداء API حقيقي
+            const reply = await fakeApiReply(value);
+
+            setTyping(false);
+            addMessage(reply, "bot");
+        } catch (e) {
+            setTyping(false);
+            addMessage("حدث خطأ أثناء جلب الرد.", "bot");
+        } finally {
+            send.disabled = false;
+        }
+    }
+
+    send.onclick = handleSend;
+
+    text.addEventListener("keypress", e => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            handleSend();
+        }
+    });
+
+    // رسالة ترحيب
+    addMessage("مرحبًا يا i_x 👋\nاكتب أي شيء وسأرد عليك بشكل تجريبي الآن.", "bot");
 </script>
 
 </body>
