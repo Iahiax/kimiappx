@@ -44,11 +44,7 @@ jobs:
             xcodebuild -exportArchive -archivePath $BUILD_DIR/KimiApp.xcarchive -exportPath $BUILD_DIR -exportOptionsPlist ExportOptions.plist | tee export.log || (tail -n 200 export.log && exit 1)
           else
             echo "ExportOptions.plist not found, exporting with ad-hoc defaults"
-            cat > $BUILD_DIR/ExportOptions.plist <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict><key>method</key><string>ad-hoc</string></dict></plist>
-EOF
+            printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' '<plist version="1.0"><dict><key>method</key><string>ad-hoc</string></dict></plist>' > "$BUILD_DIR/ExportOptions.plist"
             xcodebuild -exportArchive -archivePath $BUILD_DIR/KimiApp.xcarchive -exportPath $BUILD_DIR -exportOptionsPlist $BUILD_DIR/ExportOptions.plist | tee export.log || (tail -n 200 export.log && exit 1)
           fi
 
